@@ -1,14 +1,29 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const axios = require('axios');
+const express = require('express');
 
-// Buat instance client
+// Buat instance client Discord
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 // URL dasar untuk API ProxyScrape
 const PROXYSCRAPE_API_URL = "https://api.proxyscrape.com/v2/?request=getproxies";
 
+// Buat instance server Express
+const app = express();
+const port = process.env.PORT || 3000;
+
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
+});
+
+// Rute dasar untuk server web
+app.get('/', (req, res) => {
+    res.send('Bot Discord berjalan dengan server web!');
+});
+
+// Jalankan server web
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
 });
 
 client.on('messageCreate', async (message) => {
@@ -36,6 +51,11 @@ client.on('messageCreate', async (message) => {
             // Validating timeout
             if (isNaN(timeout)) {
                 await message.channel.send('Invalid timeout. It should be a number representing milliseconds.');
+                return;
+            }
+            // Validating country
+            if (!['US', 'CA', 'UK', 'DE', 'FR', 'NL', 'JP', 'KR', 'AU', 'CN', 'RU'].includes(country)) {
+                await message.channel.send('Invalid country. Choose from: US, CA, UK, DE, FR, NL, JP, KR, AU, CN, RU.');
                 return;
             }
 
